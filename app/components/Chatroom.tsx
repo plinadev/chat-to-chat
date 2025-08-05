@@ -29,8 +29,6 @@ function Chatroom({ user, selectedChatroom }: UserCardProps) {
 
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [image, setImage] = useState<string | null>(null);
-  const messagesContainerRef = useRef(null);
 
   useEffect(() => {
     if (!chatroomId) return;
@@ -58,14 +56,13 @@ function Chatroom({ user, selectedChatroom }: UserCardProps) {
   const sendMessage = async () => {
     const messageCollection = collection(firestore, "messages");
 
-    if (message.trim() === "" && !image) return;
+    if (message.trim() === "") return;
 
     try {
       const messageData = {
         chatroomId,
         senderId: me.uid,
         content: message,
-        image: image,
         messageType: message ? "image" : "text",
         time: serverTimestamp(),
         receiverId: otherUser?.uid || "",
@@ -98,8 +95,6 @@ function Chatroom({ user, selectedChatroom }: UserCardProps) {
         sendMessage={sendMessage}
         message={message}
         setMessage={setMessage}
-        image={image}
-        setImage={setImage}
       />
     </div>
   );
