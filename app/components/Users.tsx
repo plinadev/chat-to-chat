@@ -1,6 +1,6 @@
+
 import { User } from "@/types";
 import { useState } from "react";
-import Chatroom from "./Chatroom";
 import UserCard from "./UserCard";
 
 interface UserCardProps {

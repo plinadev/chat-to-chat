@@ -43,7 +43,7 @@ export default function Home() {
         {user && <Users user={user} />}
       </div>
       <div className="flex-grow w-3/12">
-        <Chatroom />
+        <Chatroom user={user}/>
       </div>
     </div>
   );
