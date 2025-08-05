@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-
 type FormErrors = {
   email?: string;
   password?: string;
@@ -112,7 +111,7 @@ function LoginPage() {
             {loading ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
-              "Register"
+              "Login"
             )}
           </button>
 

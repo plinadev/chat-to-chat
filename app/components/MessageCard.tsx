@@ -1,17 +1,17 @@
-import { Message } from "@/types";
+import { Message, User } from "@/types";
+import timeSent from "@/utils/timeSent";
 import Image from "next/image";
-
 interface MessageCardProps {
   message: Message;
-  user: string;
+  me: User;
+  otherUser: User;
 }
 
-function MessageCard({ message, user }: MessageCardProps) {
-  const isMessageFromMe = message.sender === user;
-
+function MessageCard({ message, me, otherUser }: MessageCardProps) {
+  const isMessageFromMe = message.senderId === me.uid;
   return (
     <div
-      key={message.id}
+      key={message.uid}
       className={`flex items-end mb-4 ${
         isMessageFromMe ? "justify-end" : "justify-start"
       }`}
@@ -19,7 +19,7 @@ function MessageCard({ message, user }: MessageCardProps) {
       {!isMessageFromMe && (
         <div className="w-8 h-8 relative rounded-full overflow-hidden mr-2 flex-shrink-0">
           <Image
-            src={message.avatarUrl}
+            src={otherUser.avatarUrl}
             alt="avatar"
             className="object-cover"
             fill
@@ -43,14 +43,14 @@ function MessageCard({ message, user }: MessageCardProps) {
               : "text-stone-500"
           } text-right`}
         >
-          {message.time}
+          {message.time && timeSent(message.time)}
         </div>
       </div>
 
       {isMessageFromMe && (
         <div className="w-8 h-8 relative rounded-full overflow-hidden ml-2 flex-shrink-0">
           <Image
-            src={message.avatarUrl}
+            src={me.avatarUrl}
             alt="avatar"
             className="object-cover"
             fill

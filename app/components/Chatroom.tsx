@@ -1,45 +1,106 @@
-import { Message, User } from "@/types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Message, SelectedChatroom, User } from "@/types";
 import MessageCard from "./MessageCard";
 import MessageInput from "./MessageInput";
+import { useEffect, useRef, useState } from "react";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { firestore } from "@/firebase.config";
+import toast from "react-hot-toast";
 
 interface UserCardProps {
   user: User;
+  selectedChatroom: SelectedChatroom;
 }
 
-function Chatroom({ user }: UserCardProps) {
-  const messages: Message[] = [
-    {
-      id: 1,
-      sender: "katty perry",
-      avatarUrl:
-        "https://avataaars.io/?accessoriesType=Kurt&avatarStyle=Circle&clotheColor=PastelBlue&clotheType=ShirtVNeck&eyeType=Close&eyebrowType=FlatNatural&facialHairColor=Blonde&facialHairType=MoustacheMagnum&hairColor=BlondeGolden&hatColor=White&mouthType=Serious&skinColor=DarkBrown&topType=LongHairBigHair",
+function Chatroom({ user, selectedChatroom }: UserCardProps) {
+  const me = selectedChatroom.myData;
+  const otherUser = selectedChatroom.otherUserData;
+  const chatroomId = selectedChatroom.uid;
 
-      content: "hey how are you?",
-      time: "2h ago",
-    },
-    {
-      id: 2,
-      sender: "joni mitchell",
-      avatarUrl:
-        "https://avataaars.io/?accessoriesType=Kurt&avatarStyle=Circle&clotheColor=PastelBlue&clotheType=ShirtVNeck&eyeType=Close&eyebrowType=FlatNatural&facialHairColor=Blonde&facialHairType=MoustacheMagnum&hairColor=BlondeGolden&hatColor=White&mouthType=Serious&skinColor=DarkBrown&topType=LongHairBigHair",
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [image, setImage] = useState<string | null>(null);
+  const messagesContainerRef = useRef(null);
 
-      content: "hey how are you?",
-      time: "2h ago",
-    },
-  ];
+  useEffect(() => {
+    if (!chatroomId) return;
+
+    const unsubscribe = onSnapshot(
+      query(
+        collection(firestore, "messages"),
+        where("chatroomId", "==", chatroomId),
+        orderBy("time", "asc")
+      ),
+      (snapshot) => {
+        const messagesData: Message[] = snapshot.docs.map((doc) => ({
+          uid: doc.id,
+          ...(doc.data() as Omit<Message, "uid">),
+        }));
+
+        console.log(messagesData);
+        setMessages(messagesData);
+      }
+    );
+
+    return unsubscribe;
+  }, [chatroomId]);
+
+  const sendMessage = async () => {
+    const messageCollection = collection(firestore, "messages");
+
+    if (message.trim() === "" && !image) return;
+
+    try {
+      const messageData = {
+        chatroomId,
+        senderId: me.uid,
+        content: message,
+        image: image,
+        messageType: message ? "image" : "text",
+        time: serverTimestamp(),
+        receiverId: otherUser?.uid || "",
+      };
+      await addDoc(messageCollection, messageData);
+      setMessage("");
+
+      const chatroomRef = doc(firestore, "chatrooms", chatroomId);
+      await updateDoc(chatroomRef, {
+        lastMessage: messageData,
+      });
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1 overflow-y-auto p-10">
         {messages.map((message) => (
           <MessageCard
-            key={message.id}
+            key={message.uid}
             message={message}
-            user={"joni mitchell"}
+            me={user}
+            otherUser={otherUser!}
           />
         ))}
       </div>
 
-      <MessageInput />
+      <MessageInput
+        sendMessage={sendMessage}
+        message={message}
+        setMessage={setMessage}
+        image={image}
+        setImage={setImage}
+      />
     </div>
   );
 }

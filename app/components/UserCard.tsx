@@ -4,7 +4,7 @@ import Image from "next/image";
 interface UserCardProps {
   name: string;
   avatarUrl: string;
-  latestMessageText?: string;
+  latestMessageText?: string | null;
   time: string;
   type: string;
 }

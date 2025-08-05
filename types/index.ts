@@ -1,3 +1,5 @@
+import { FieldValue, Timestamp } from "firebase/firestore";
+
 export type User = {
   uid: string;
   name: string;
@@ -6,9 +8,26 @@ export type User = {
 };
 
 export type Message = {
-  id: number;
-  sender: string;
-  avatarUrl: string;
+  uid: string;
+  chatroomId: string;
+  senderId: string;
   content: string;
-  time: string;
+  image: string;
+  messageType: "text" | "image";
+  time: Timestamp;
+  receiverId: string;
+};
+
+export type Chatroom = {
+  uid: string;
+  timestamp: Timestamp;
+  users: string[];
+  lastMessage: Message | null;
+  usersData: User[];
+};
+
+export type SelectedChatroom = {
+  uid: string;
+  myData: User;
+  otherUserData: User | undefined;
 };

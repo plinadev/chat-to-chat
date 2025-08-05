@@ -1,7 +1,7 @@
 "use client";
 
 import { firestore } from "@/firebase.config";
-import { User } from "@/types";
+import { SelectedChatroom, User } from "@/types";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -11,8 +11,11 @@ import Chatroom from "./components/Chatroom";
 
 export default function Home() {
   const auth = getAuth();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>();
   const router = useRouter();
+
+  const [selectedChatroom, setSelectedChatroom] =
+    useState<SelectedChatroom | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -38,12 +41,16 @@ export default function Home() {
   }, [auth, router]);
 
   return (
-    <div className="flex h-screen p-5">
+    <div className="flex h-screen overflow-hidden">
       <div className="flex-shrink-0 w-4/12 ">
-        {user && <Users user={user} />}
+        {user && (
+          <Users userData={user} setSelectedChatroom={setSelectedChatroom} />
+        )}
       </div>
       <div className="flex-grow w-3/12">
-        <Chatroom user={user}/>
+        {user && selectedChatroom && (
+          <Chatroom user={user} selectedChatroom={selectedChatroom} />
+        )}
       </div>
     </div>
   );

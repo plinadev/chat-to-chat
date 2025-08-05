@@ -12,6 +12,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "daisyui": "^5.0.50",
     "firebase": "^12.0.0",
+    "moment": "^2.30.1",
     "next": "15.4.5",
     "random-avatar-generator": "^2.0.0",
     "react": "19.1.0",
